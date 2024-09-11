@@ -1,0 +1,28 @@
+name: Webhook Events
+
+on:
+  push:
+    branches:
+      - main  # Triggers on push to main branch
+  pull_request:
+    types: [opened, closed]  # Triggers when a pull request is opened or closed
+
+jobs:
+  webhook-job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Trigger Webhook
+      run: |
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -H "X-GitHub-Event: ${{ github.event_name }}" \
+          -d '{"ref":"refs/heads/main", "pusher": {"name": "${{ github.actor }}"}}' \
+          https://cec4-2401-4900-883a-bb1c-ccb5-39c3-3c45-f4c0.ngrok-free.app/webhook/receiver
+
+    - name: Notify on success
+      if: success()
+      run: echo "Webhook event successfully triggered!"
